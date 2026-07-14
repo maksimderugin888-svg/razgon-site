@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Loop — кинематографичная бесшовная анимация</title>
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #020412;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+  }
+  #rec {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 10;
+    font: 500 12px/1 "SF Mono", Consolas, monospace;
+    color: rgba(160, 200, 255, 0.85);
+    background: rgba(10, 20, 50, 0.55);
+    border: 1px solid rgba(120, 170, 255, 0.35);
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    transition: opacity 0.6s, background 0.2s;
+    opacity: 0.25;
+  }
+  #rec:hover { opacity: 1; background: rgba(20, 40, 90, 0.7); }
+  #rec.on { color: #ff6b6b; border-color: rgba(255, 107, 107, 0.5); opacity: 1; }
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+<button id="rec" title="Записать ровно один круг петли в .webm">⏺ rec&nbsp;loop</button>
+<script>
+'use strict';
+/* ════════════════════════════════════════════════════════════
+   Бесшовная кинематографичная петля: голографический ИИ-мир.
+   Всё движение — периодические функции с частотами k·2π/LOOP,
+   поэтому кадр при t=0 и t=LOOP идентичен (идеальный луп).
+   ?size=4k | fhd | 1600x900 — внутреннее разрешение (для записи).
+   ?theme=razgon — фирменная палитра RAZGON (чёрный + кислотный).
+   ════════════════════════════════════════════════════════════ */
+
+const LOOP = 20000;                     // длительность петли, мс
+const TAU = Math.PI * 2;
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const canvas = document.getElementById('fx');
+const ctx = canvas.getContext('2d');
+
+/* детерминированный рандом — сцена всегда одинаковая */
+function mulberry32(seed) {
+  return function () {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+const rnd = mulberry32(20260708);
+
+const params = new URLSearchParams(location.search);
+let W = 0, H = 0, DPR = 1, fixed = null;
+{
+  const s = params.get('size');
+  if (s === '4k') fixed = [3840, 2160];
+  else if (s === 'fhd') fixed = [1920, 1080];
+  else if (/^\d+x\d+$/.test(s || '')) fixed = s.split('x').map(Number);
+}
+
+function resize() {
+  if (fixed) {
+    W = fixed[0]; H = fixed[1];
+    canvas.width = W; canvas.height = H;
+    const s = Math.min(innerWidth / W, innerHeight / H);
+    canvas.style.width = W * s + 'px';
+    canvas.style.height = H * s + 'px';
+    canvas.style.margin = ((innerHeight - H * s) / 2) + 'px auto 0';
+  } else {
+    DPR = Math.min(devicePixelRatio || 1, 2);
+    W = Math.round(innerWidth * DPR);
+    H = Math.round(innerHeight * DPR);
+    canvas.width = W; canvas.height = H;
+  }
+}
+resize();
+addEventListener('resize', () => { resize(); buildStatics(); });
+
+/* ── палитры: blue (референс OpenAI/Stripe) и razgon (бренд) ──
+   роли: blue=основной, cyan=вторичный, violet=акцент, white=яркий */
+const THEMES = {
+  blue: {
+    ink: { blue: '96, 150, 255', cyan: '125, 211, 252', violet: '150, 120, 255', white: '215, 230, 255' },
+    bg: ['#020411', '#040a26', '#02051a'],
+    glow: '60, 110, 255',
+    vig: '1, 2, 10',
+    panelFill: 'rgba(8, 18, 52, 0.42)',
+    panelBorder: 'rgba(120, 170, 255, 0.45)',
+    panelGlow: 'rgba(90, 140, 255, 0.8)',
+    panelRule: 'rgba(120, 170, 255, 0.18)',
+  },
+  razgon: {
+    ink: { blue: '215, 255, 0', cyan: '245, 245, 240', violet: '255, 77, 0', white: '234, 255, 130' },
+    bg: ['#050505', '#0c0d06', '#060605'],
+    glow: '180, 215, 0',
+    vig: '3, 3, 2',
+    panelFill: 'rgba(20, 22, 6, 0.45)',
+    panelBorder: 'rgba(215, 255, 0, 0.4)',
+    panelGlow: 'rgba(215, 255, 0, 0.7)',
+    panelRule: 'rgba(215, 255, 0, 0.16)',
+    rayScale: 0.55,
+  },
+};
+const themeName = THEMES[params.get('theme')] ? params.get('theme') : 'blue';
+const T = THEMES[themeName];
+const C = T.ink;
+document.body.style.background = T.bg[0];
+
+/* ── спрайт мягкого свечения (рисуем 1 раз, дальше drawImage) ── */
+function glowSprite(rgb, size) {
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const g = c.getContext('2d');
+  const grad = g.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+  grad.addColorStop(0, `rgba(${rgb}, 0.9)`);
+  grad.addColorStop(0.25, `rgba(${rgb}, 0.35)`);
+  grad.addColorStop(1, `rgba(${rgb}, 0)`);
+  g.fillStyle = grad;
+  g.fillRect(0, 0, size, size);
+  return c;
+}
+const SPR = {
+  blue: glowSprite(C.blue, 64),
+  cyan: glowSprite(C.cyan, 64),
+  violet: glowSprite(C.violet, 64),
+  white: glowSprite(C.white, 64),
+};
+
+/* ── голографическая панель «кода» (оффскрин, рисуем 1 раз) ── */
+function makePanel(w, h, seed) {
+  const r = mulberry32(seed);
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const g = c.getContext('2d');
+  const rad = 14;
+
+  g.beginPath();
+  g.roundRect(1, 1, w - 2, h - 2, rad);
+  g.fillStyle = T.panelFill;
+  g.fill();
+  g.strokeStyle = T.panelBorder;
+  g.lineWidth = 1.5;
+  g.shadowColor = T.panelGlow;
+  g.shadowBlur = 18;
+  g.stroke();
+  g.shadowBlur = 0;
+
+  /* шапка окна: три точки */
+  for (let i = 0; i < 3; i++) {
+    g.beginPath();
+    g.arc(20 + i * 16, 18, 4, 0, TAU);
+    g.fillStyle = `rgba(${C.blue}, ${0.5 + i * 0.12})`;
+    g.fill();
+  }
+  g.strokeStyle = T.panelRule;
+  g.beginPath(); g.moveTo(10, 32); g.lineTo(w - 10, 32); g.stroke();
+
+  /* строки «кода» — цветные штрихи с отступами, читается как код */
+  const colors = [C.cyan, C.blue, C.violet, C.white];
+  let y = 50;
+  while (y < h - 16) {
+    let x = 18 + (r() < 0.4 ? 22 : 0) + (r() < 0.2 ? 22 : 0); // «вложенность»
+    const segs = 1 + (r() * 3 | 0);
+    for (let s = 0; s < segs && x < w - 30; s++) {
+      const len = 16 + r() * (w * 0.28);
+      const col = colors[(r() * colors.length) | 0];
+      g.fillStyle = `rgba(${col}, ${0.35 + r() * 0.45})`;
+      g.beginPath();
+      g.roundRect(x, y, Math.min(len, w - 18 - x), 5, 2.5);
+      g.fill();
+      x += len + 12;
+    }
+    y += 16;
+  }
+  return c;
+}
+
+/* ═══════════ сцена ═══════════ */
+let panels = [], particles = [], nodes = [], edges = [], rain = [], traces = [];
+
+function buildStatics() {
+  const u = Math.min(W, H) / 1000;      // масштабная единица
+
+  /* панели: x,y в долях экрана, z — глубина (параллакс) */
+  const defs = [
+    { x: 0.16, y: 0.30, w: 340, h: 230, z: 0.85 },
+    { x: 0.80, y: 0.36, w: 300, h: 260, z: 0.75 },
+    { x: 0.55, y: 0.20, w: 230, h: 150, z: 0.45 },
+    { x: 0.10, y: 0.66, w: 260, h: 160, z: 0.55 },
+    { x: 0.86, y: 0.72, w: 220, h: 140, z: 0.4 },
+    { x: 0.42, y: 0.55, w: 180, h: 120, z: 0.3 },
+  ];
+  panels = defs.map((d, i) => ({
+    ...d,
+    w: d.w * u * 1.4, h: d.h * u * 1.4,
+    img: makePanel(Math.round(d.w * u * 1.4), Math.round(d.h * u * 1.4), 100 + i),
+    phase: rnd() * TAU,
+    fadeK: 1 + (i % 3),                 // целые частоты → бесшовно
+    amp: (6 + rnd() * 10) * u,
+  }));
+
+  /* частицы: орбитальный дрейф на синусах (гарантированный луп) */
+  particles = Array.from({ length: 130 }, () => ({
+    x: rnd(), y: rnd(),
+    ax: (10 + rnd() * 40), ay: (8 + rnd() * 30),
+    kx: 1 + (rnd() * 2 | 0), ky: 1 + (rnd() * 2 | 0),
+    px: rnd() * TAU, py: rnd() * TAU,
+    z: 0.25 + rnd() * 0.75,
+    spr: [SPR.blue, SPR.cyan, SPR.white][(rnd() * 3) | 0],
+  }));
+
+  /* нейросеть: узлы в средней зоне + рёбра по близости */
+  nodes = Array.from({ length: 34 }, () => ({
+    x: 0.08 + rnd() * 0.84,
+    y: 0.28 + rnd() * 0.5,
+    a: rnd() * TAU, k: 1 + (rnd() * 2 | 0),
+    amp: (4 + rnd() * 9),
+    z: 0.4 + rnd() * 0.5,
+  }));
+  edges = [];
+  for (let i = 0; i < nodes.length; i++)
+    for (let j = i + 1; j < nodes.length; j++) {
+      const dx = nodes[i].x - nodes[j].x, dy = (nodes[i].y - nodes[j].y) * (H / W);
+      if (Math.hypot(dx, dy) < 0.16) edges.push({ a: i, b: j, phase: rnd() });
+    }
+  /* «API-соединения» вспыхивают по очереди: равные фазовые слоты */
+  edges.forEach((e, i) => { e.pulseSlot = i / edges.length; });
+
+  /* бинарный дождь: колонки цифр, целое число прокрутов за LOOP */
+  rain = Array.from({ length: 26 }, () => ({
+    x: rnd(),
+    speed: 1 + (rnd() * 3 | 0),          // целое → бесшовно
+    phase: rnd(),
+    glyphs: Array.from({ length: 22 }, () => rnd() < 0.5 ? '0' : '1'),
+    dim: 0.05 + rnd() * 0.12,
+    size: (9 + rnd() * 8),
+  }));
+
+  /* печатные дорожки на «полу» с бегущими импульсами */
+  traces = Array.from({ length: 7 }, (_, i) => {
+    const pts = [];
+    let x = rnd() * 0.3, y = 0.82 + rnd() * 0.15;
+    pts.push([x, y]);
+    for (let s = 0; s < 4; s++) {
+      x += 0.1 + rnd() * 0.18;
+      pts.push([x, y]);
+      if (s < 3) { y += (rnd() - 0.5) * 0.1; pts.push([x, y]); }
+    }
+    return { pts, phase: rnd(), speed: 1 + (rnd() * 2 | 0), dim: 0.25 + rnd() * 0.3 };
+  });
+}
+buildStatics();
+
+/* виньетка — оффскрин */
+let vignette = null;
+function makeVignette() {
+  vignette = document.createElement('canvas');
+  vignette.width = W; vignette.height = H;
+  const g = vignette.getContext('2d');
+  const grad = g.createRadialGradient(W/2, H*0.45, Math.min(W,H)*0.25, W/2, H*0.55, Math.max(W,H)*0.75);
+  grad.addColorStop(0, `rgba(${T.vig}, 0)`);
+  grad.addColorStop(1, `rgba(${T.vig}, 0.82)`);
+  g.fillStyle = grad;
+  g.fillRect(0, 0, W, H);
+}
+makeVignette();
+addEventListener('resize', makeVignette);
+
+/* ═══════════ отрисовка кадра для момента p∈[0,1) петли ═══════════ */
+function draw(p) {
+  const u = Math.min(W, H) / 1000;
+
+  /* камера: медленный наезд + лёгкий параллакс-дрейф (частота 1 → луп) */
+  const camX = Math.sin(p * TAU) * 26 * u;
+  const camY = Math.cos(p * TAU) * 14 * u;
+  const zoom = 1.045 + Math.sin(p * TAU) * 0.035;
+
+  /* фон */
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, T.bg[0]);
+  bg.addColorStop(0.55, T.bg[1]);
+  bg.addColorStop(1, T.bg[2]);
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  /* дальнее свечение за «мозгом» сцены */
+  const cg = ctx.createRadialGradient(W*0.5, H*0.52, 0, W*0.5, H*0.52, Math.max(W,H)*0.5);
+  const breathe = 0.13 + 0.05 * Math.sin(p * TAU * 2);
+  cg.addColorStop(0, `rgba(${T.glow}, ${breathe})`);
+  cg.addColorStop(1, `rgba(${T.glow}, 0)`);
+  ctx.fillStyle = cg;
+  ctx.fillRect(0, 0, W, H);
+
+  /* ── бинарный дождь (самый дальний план) ── */
+  ctx.textAlign = 'center';
+  for (const col of rain) {
+    const x = ((col.x + camX / W * 0.15) % 1) * W;
+    const step = col.size * 1.7 * u * 2;
+    const total = H + step * col.glyphs.length;
+    const off = ((p * col.speed + col.phase) % 1) * total;
+    ctx.font = `${col.size * u * 2}px Consolas, monospace`;
+    for (let i = 0; i < col.glyphs.length; i++) {
+      const y = (off + i * step) % total - step;
+      if (y < -step || y > H) continue;
+      const head = i === col.glyphs.length - 1;
+      ctx.fillStyle = `rgba(${C.blue}, ${head ? col.dim * 2.6 : col.dim})`;
+      ctx.fillText(col.glyphs[i], x, y);
+    }
+  }
+
+  /* ── кибер-сетка пола в перспективе ── */
+  const horizon = H * 0.60 + camY * 0.4;
+  const vpx = W / 2 + camX * 0.6;
+  ctx.save();
+  ctx.strokeStyle = `rgba(${C.blue}, 0.14)`;
+  ctx.lineWidth = Math.max(1, u);
+  /* вертикали к точке схода */
+  for (let i = -14; i <= 14; i++) {
+    const bx = vpx + i * W * 0.09 * zoom;
+    ctx.beginPath();
+    ctx.moveTo(vpx + (bx - vpx) * 0.12, horizon);
+    ctx.lineTo(bx + (bx - vpx) * 1.6, H);
+    ctx.stroke();
+  }
+  /* горизонтали, едущие на камеру: 3 клетки за петлю */
+  const scroll = (p * 3) % 1;
+  for (let r = 0; r < 14; r++) {
+    const f = (r + scroll) / 14;
+    const y = horizon + Math.pow(f, 2.1) * (H - horizon);
+    const a = 0.03 + Math.pow(f, 1.6) * 0.22;
+    ctx.strokeStyle = `rgba(${C.blue}, ${a})`;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+  ctx.restore();
+
+  /* ── печатные дорожки с импульсами ── */
+  for (const tr of traces) {
+    ctx.strokeStyle = `rgba(${C.blue}, ${tr.dim * 0.4})`;
+    ctx.lineWidth = 1.6 * u;
+    ctx.beginPath();
+    tr.pts.forEach(([px_, py_], i) => {
+      const x = px_ * W + camX * 0.8, y = py_ * H + camY * 0.8;
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    });
+    ctx.stroke();
+    /* импульс бежит по дорожке */
+    const prog = (p * tr.speed + tr.phase) % 1;
+    /* длина ломаной */
+    let total = 0, lens = [];
+    for (let i = 1; i < tr.pts.length; i++) {
+      const l = Math.hypot((tr.pts[i][0]-tr.pts[i-1][0]) * W, (tr.pts[i][1]-tr.pts[i-1][1]) * H);
+      lens.push(l); total += l;
+    }
+    let d = prog * total;
+    for (let i = 1; i < tr.pts.length; i++) {
+      if (d <= lens[i-1]) {
+        const f = d / lens[i-1];
+        const x = (tr.pts[i-1][0] + (tr.pts[i][0]-tr.pts[i-1][0]) * f) * W + camX * 0.8;
+        const y = (tr.pts[i-1][1] + (tr.pts[i][1]-tr.pts[i-1][1]) * f) * H + camY * 0.8;
+        const s = 46 * u;
+        ctx.globalAlpha = 0.9;
+        ctx.drawImage(SPR.cyan, x - s/2, y - s/2, s, s);
+        ctx.globalAlpha = 1;
+        break;
+      }
+      d -= lens[i-1];
+    }
+  }
+
+  /* ── нейросеть ── */
+  const npos = nodes.map(n => ({
+    x: n.x * W + Math.sin(p * TAU * n.k + n.a) * n.amp * u * 2 + camX * n.z,
+    y: n.y * H + Math.cos(p * TAU * n.k + n.a) * n.amp * u * 2 + camY * n.z,
+    z: n.z,
+  }));
+  for (const e of edges) {
+    const A = npos[e.a], B = npos[e.b];
+    /* базовое пульсирующее свечение связи */
+    const base = 0.11 + 0.07 * Math.sin(p * TAU * 2 + e.phase * TAU);
+    /* «API-вспышка»: гауссово окно вокруг своего фазового слота */
+    const dt = ((p - e.pulseSlot) % 1 + 1) % 1;
+    const dph = dt > 0.5 ? 1 - dt : dt;
+    const flash = Math.exp(-Math.pow(dph / 0.018, 2));
+    ctx.strokeStyle = `rgba(${C.blue}, ${Math.min(0.8, base + flash * 0.6)})`;
+    ctx.lineWidth = (1 + flash * 1.6) * u;
+    ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
+    /* сигнал ПРОБЕГАЕТ по ребру сразу после вспышки слота */
+    if (dt < 0.05) {
+      const f = dt / 0.05;
+      const x = A.x + (B.x - A.x) * f, y = A.y + (B.y - A.y) * f;
+      const s = 38 * u * (1.4 - f * 0.6);
+      ctx.globalAlpha = Math.sin(f * Math.PI);
+      ctx.drawImage(SPR.white, x - s/2, y - s/2, s, s);
+      ctx.globalAlpha = 1;
+    }
+  }
+  for (const n of npos) {
+    const s = 34 * u * n.z * 2;
+    ctx.drawImage(SPR.cyan, n.x - s/2, n.y - s/2, s, s);
+  }
+
+  /* ── частицы ── */
+  for (const pt of particles) {
+    const x = pt.x * W + Math.sin(p * TAU * pt.kx + pt.px) * pt.ax * u * 2 + camX * pt.z;
+    const y = pt.y * H + Math.cos(p * TAU * pt.ky + pt.py) * pt.ay * u * 2 + camY * pt.z;
+    const s = (10 + 26 * pt.z) * u;
+    ctx.globalAlpha = 0.35 + pt.z * 0.5;
+    ctx.drawImage(pt.spr, x - s/2, y - s/2, s, s);
+  }
+  ctx.globalAlpha = 1;
+
+  /* ── голографические панели (появляются и тают) ── */
+  for (const pn of panels) {
+    /* плавное появление/исчезание: окно видимости ~70% петли */
+    const vis = 0.5 + 0.5 * Math.sin(p * TAU * pn.fadeK + pn.phase);
+    const alpha = Math.min(1, Math.max(0, (vis - 0.15) / 0.35)) * 0.92;
+    if (alpha <= 0.01) continue;
+    const fx = pn.x * W + camX * pn.z + Math.sin(p * TAU + pn.phase) * pn.amp;
+    const fy = pn.y * H + camY * pn.z + Math.cos(p * TAU * 2 + pn.phase) * pn.amp * 0.6;
+    const sc = (0.8 + 0.25 * pn.z) * (zoom * 0.5 + 0.5);
+    ctx.save();
+    ctx.translate(fx, fy);
+    ctx.scale(sc, sc);
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(pn.img, -pn.w / 2, -pn.h / 2);
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
+
+  /* ── объёмные лучи света ── */
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 3; i++) {
+    const ang = -0.5 + i * 0.5 + Math.sin(p * TAU + i * 2.1) * 0.05;
+    const ox = W * (0.2 + i * 0.3), oy = -H * 0.1;
+    const alpha = (0.028 + 0.016 * Math.sin(p * TAU * 2 + i * 2.4)) * (T.rayScale || 1);
+    const g = ctx.createLinearGradient(ox, oy, ox + Math.sin(ang) * H * 1.4, oy + Math.cos(ang) * H * 1.4);
+    g.addColorStop(0, `rgba(${C.blue}, ${alpha * 2})`);
+    g.addColorStop(1, `rgba(${T.glow}, 0)`);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(ox - W * 0.06, oy);
+    ctx.lineTo(ox + W * 0.06, oy);
+    ctx.lineTo(ox + Math.sin(ang) * H * 1.5 + W * 0.16, oy + Math.cos(ang) * H * 1.5);
+    ctx.lineTo(ox + Math.sin(ang) * H * 1.5 - W * 0.16, oy + Math.cos(ang) * H * 1.5);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.restore();
+
+  /* виньетка */
+  ctx.drawImage(vignette, 0, 0);
+}
+
+/* ═══════════ цикл ═══════════ */
+let t0 = performance.now();
+if (reduced) {
+  draw(0.35);                            // статичный красивый кадр
+  document.getElementById('rec').style.display = 'none';
+} else {
+  (function frame(now) {
+    draw(((now - t0) % LOOP) / LOOP);
+    requestAnimationFrame(frame);
+  })(t0);
+}
+
+/* ═══════════ запись одного круга в .webm ═══════════ */
+const recBtn = document.getElementById('rec');
+recBtn.addEventListener('click', () => {
+  if (recBtn.classList.contains('on')) return;
+  recBtn.classList.add('on');
+  recBtn.textContent = '⏺ жду начала петли…';
+  const stream = canvas.captureStream(60);
+  const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+    ? 'video/webm;codecs=vp9' : 'video/webm';
+  const recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 24_000_000 });
+  const chunks = [];
+  recorder.ondataavailable = e => chunks.push(e.data);
+  recorder.onstop = () => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(chunks, { type: 'video/webm' }));
+    a.download = `ai-loop-${themeName}.webm`;
+    a.click();
+    recBtn.classList.remove('on');
+    recBtn.innerHTML = '⏺ rec&nbsp;loop';
+    console.log('Конвертация в mp4: ffmpeg -i ai-loop.webm -c:v libx264 -crf 16 -pix_fmt yuv420p ai-loop.mp4');
+  };
+  /* стартуем ровно на границе петли, пишем ровно LOOP мс */
+  const wait = () => {
+    const pos = (performance.now() - t0) % LOOP;
+    if (pos < 30) {
+      recorder.start();
+      recBtn.textContent = '⏺ запись…';
+      setTimeout(() => recorder.stop(), LOOP);
+    } else requestAnimationFrame(wait);
+  };
+  wait();
+});
+</script>
+</body>
+</html>

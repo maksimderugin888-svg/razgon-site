@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ru" class="no-js">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RAZGON — студия цифровых технологий: Telegram-боты, сайты, ИИ-контент, игры</title>
+  <meta name="description" content="Боты, сайты, ИИ-контент и игры под ключ. Первое живое демо через 48 часов, цена фиксируется до старта. Не понравилось первое демо — вернём предоплату.">
+  <meta property="og:title" content="RAZGON — цифра, которая продаёт">
+  <meta property="og:description" content="Telegram-боты, веб-приложения, ИИ-контент и игры под ключ. Первое демо через 48 часов.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://razgonstudio.ru/">
+  <link rel="canonical" href="https://razgonstudio.ru/">
+  <meta name="theme-color" content="#0A0A0A">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23D7FF00'/%3E%3Ctext x='32' y='46' font-family='Arial Black,sans-serif' font-size='40' font-weight='900' text-anchor='middle' fill='%230A0A0A'%3ER%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- прогресс скролла -->
+  <div class="progress" id="progress" aria-hidden="true"></div>
+
+  <!-- кастомный курсор -->
+  <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+  <div class="cursor-ring" id="cursorRing" aria-hidden="true"><span class="cursor-label">ЖМИ</span></div>
+
+  <!-- ═══════════ ШАПКА ═══════════ -->
+  <header class="header" id="header">
+    <div class="header-in">
+      <button class="logo" id="logo" type="button" aria-label="RAZGON — 5 быстрых кликов включают режим турбо">
+        RAZGON<span class="logo-dot">.</span>
+      </button>
+      <nav class="nav" aria-label="Основная навигация">
+        <a href="#services">Услуги</a>
+        <a href="#process">Процесс</a>
+        <a href="#cases">Кейсы</a>
+        <a href="#quiz">Подбор</a>
+        <a href="#pricing">Прайс</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <a class="btn btn-small js-tg-link" href="https://t.me/razgon_studio" target="_blank" rel="noopener" data-magnetic>Обсудить проект</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- ═══════════ HERO ═══════════ -->
+    <section class="hero" id="hero">
+      <canvas class="hero-fx" id="heroFx" aria-hidden="true"></canvas>
+      <div class="sec-num hero-num" aria-hidden="true">RZGN</div>
+      <div class="container">
+        <p class="hero-label mono">// студия цифровых технологий полного цикла</p>
+        <h1 class="hero-title" id="heroTitle" aria-label="Цифра, которая продаёт.">ЦИФРА, КОТОРАЯ ПРОДАЁТ.</h1>
+        <p class="hero-sub">Боты, сайты, ИИ-контент и игры под&nbsp;ключ. Первый живой результат&nbsp;— через <b>48&nbsp;часов</b>, а&nbsp;не&nbsp;через месяц созвонов. Цена фиксируется до&nbsp;старта и&nbsp;не&nbsp;«уточняется» потом.</p>
+        <div class="hero-cta">
+          <a class="btn btn-big js-tg-link" href="https://t.me/razgon_studio" target="_blank" rel="noopener" data-magnetic>Обсудить проект в Telegram <span class="arr">→</span></a>
+          <p class="cta-note mono">отвечаем за 15 минут в рабочее время · или звоните: <a class="tel-link" href="tel:+79995855877">+7&nbsp;999&nbsp;585-58-77</a></p>
+        </div>
+        <div class="hero-foot">
+          <p class="pulse mono"><span class="pulse-dot" aria-hidden="true"></span>в работе: 4 проекта · ближайший свободный слот — <span id="slotDate">на этой неделе</span></p>
+          <p class="bot-counter mono">пока вы на этой странице, ваш будущий бот ответил бы <b id="botCounter">0</b> клиентам</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- тикер -->
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-track" data-speed="1">
+        <span>БОТЫ&nbsp;•&nbsp;САЙТЫ&nbsp;•&nbsp;ИИ-КОНТЕНТ&nbsp;•&nbsp;ИГРЫ&nbsp;•&nbsp;ИИ-СОТРУДНИКИ&nbsp;•&nbsp;АВТОМАТИЗАЦИЯ&nbsp;•&nbsp;</span><span>БОТЫ&nbsp;•&nbsp;САЙТЫ&nbsp;•&nbsp;ИИ-КОНТЕНТ&nbsp;•&nbsp;ИГРЫ&nbsp;•&nbsp;ИИ-СОТРУДНИКИ&nbsp;•&nbsp;АВТОМАТИЗАЦИЯ&nbsp;•&nbsp;</span>
+      </div>
+    </div>
+
+    <!-- ═══════════ [01] УСЛУГИ ═══════════ -->
+    <section class="section" id="services">
+      <div class="sec-num" aria-hidden="true">01</div>
+      <div class="container">
+        <div class="sec-head reveal">
+          <p class="sec-label mono">[01] — услуги</p>
+          <h2 class="h2 rl">
+            <span class="rl-line"><span class="rl-in">ДЕЛАЕМ ВСЁ,</span></span>
+            <span class="rl-line"><span class="rl-in">ЧТО РАБОТАЕТ <em>В 2026</em></span></span>
+          </h2>
+        </div>
+        <div class="services-grid">
+          <article class="card service-card reveal">
+            <div class="service-top">
+              <span class="service-idx mono">/01</span>
+              <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4" y="7" width="16" height="12" rx="2"/><circle cx="9" cy="13" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1.4" fill="currentColor" stroke="none"/><path d="M12 7V4M8 4h8"/></svg>
+            </div>
+            <h3>Telegram-боты и&nbsp;автоматизация</h3>
+            <p>Робот продаёт, отвечает и собирает заявки, пока вы спите. Магазины в боте, записи, рассылки, связки с CRM и оплатой.</p>
+            <p class="service-price mono">от 60 000 ₽ · 7–10 дней</p>
+          </article>
+          <article class="card service-card reveal">
+            <div class="service-top">
+              <span class="service-idx mono">/02</span>
+              <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 6.5h.01M10 6.5h.01"/></svg>
+            </div>
+            <h3>Сайты и&nbsp;веб-приложения</h3>
+            <p>От лендинга за неделю до магазина и SaaS. Быстрые, продающие, с аналитикой и заявками с первого дня.</p>
+            <p class="service-price mono">от 70 000 ₽ · от 7 дней</p>
+          </article>
+          <article class="card service-card reveal">
+            <div class="service-top">
+              <span class="service-idx mono">/03</span>
+              <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 14v-4M8 17V7M12 20V4M16 16V8M20 13v-2"/></svg>
+            </div>
+            <h3>ИИ-контент: песни, видео, аватары</h3>
+            <p>Контент-завод вместо продакшена за миллионы: ролики, треки и нейро-ведущие под ваш бренд — десятками в месяц.</p>
+            <p class="service-price mono">от 40 000 ₽ · от 3 дней</p>
+          </article>
+          <article class="card service-card reveal">
+            <div class="service-top">
+              <span class="service-idx mono">/04</span>
+              <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="2" y="7" width="20" height="10" rx="5"/><path d="M8 10v4M6 12h4"/><circle cx="16" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="18" cy="13" r="1" fill="currentColor" stroke="none"/></svg>
+            </div>
+            <h3>Игры и&nbsp;Mini Apps</h3>
+            <p>Web-игры и Telegram Mini Apps: аудитория играет — бренд запоминается. Механики удержания, рейтинги, призы.</p>
+            <p class="service-price mono">от 120 000 ₽ · от 14 дней</p>
+          </article>
+          <article class="card service-card service-card-new reveal">
+            <p class="service-new-badge mono">новое · подписка</p>
+            <div class="service-top">
+              <span class="service-idx mono">/05</span>
+              <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.3 3.6-5 8-5s8 1.7 8 5"/><path d="M17 3l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="currentColor" stroke="none"/></svg>
+            </div>
+            <h3>ИИ-сотрудник 24/7</h3>
+            <p>Нейро-продавец отвечает клиентам, квалифицирует и дожимает — пока конкуренты «перезвонят завтра». Окупается за 4–6 месяцев.</p>
+            <p class="service-price mono">внедрение от 60 000 ₽ + от 15 000 ₽/мес</p>
+          </article>
+          <article class="card service-card reveal">
+            <div class="service-top">
+              <span class="service-idx mono">/06</span>
+              <svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 4h3l1.5 4.5L8 10a12 12 0 0 0 6 6l1.5-2.5L20 15v3a2 2 0 0 1-2 2A14 14 0 0 1 4 6a2 2 0 0 1 2-2z"/></svg>
+            </div>
+            <h3>Голосовой ИИ для звонков</h3>
+            <p>Робот принимает звонки, записывает клиентов и отвечает на вопросы голосом — минус 40% нагрузки на операторов.</p>
+            <p class="service-price mono">от 120 000 ₽ · от 14 дней</p>
+          </article>
+        </div>
+        <p class="services-foot reveal">Если технологии нет в этом списке — значит, мы её уже тестируем. <a class="link js-tg-link" href="https://t.me/razgonstudio_bot" target="_blank" rel="noopener">Спросите</a>.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════ [02] ПРОЦЕСС ═══════════ -->
+    <section class="section section-process" id="process">
+      <div class="sec-num" aria-hidden="true">02</div>
+      <div class="container">
+        <div class="process-grid">
+          <div class="process-left">
+            <div class="process-sticky">
+              <p class="sec-label mono">[02] — процесс</p>
+              <h2 class="h2 rl">
+                <span class="rl-line"><span class="rl-in">4 ШАГА.</span></span>
+                <span class="rl-line"><span class="rl-in">НОЛЬ <em>ТУМАНА</em></span></span>
+              </h2>
+              <p class="process-counter mono" id="processCounter">01 / 04</p>
+            </div>
+          </div>
+          <div class="process-steps" id="processSteps">
+            <div class="step reveal" data-step="01">
+              <span class="step-num mono">01</span>
+              <h3>Созвон 30 минут</h3>
+              <p>Вы говорите, что болит. Мы говорим, сколько стоит и когда будет. Без «менеджер уточнит и перезвонит».</p>
+            </div>
+            <div class="step reveal" data-step="02">
+              <span class="step-num mono">02</span>
+              <h3>Фиксация письменно</h3>
+              <p>Цена и сроки — в договоре. Платите по этапам: за то, что уже увидели, а не за то, что пообещали.</p>
+            </div>
+            <div class="step reveal" data-step="03">
+              <span class="step-num mono">03</span>
+              <h3>Демо каждые 48 часов</h3>
+              <p>Живой продукт, а не «статус в таблице». Первое демо не зашло — возвращаем предоплату без разговоров.</p>
+            </div>
+            <div class="step reveal" data-step="04">
+              <span class="step-num mono">04</span>
+              <h3>Запуск и разгон</h3>
+              <p>Обучаем вашу команду, 30 дней поддержки бесплатно. Код и доступы принадлежат вам с первого дня.</p>
+            </div>
+          </div>
+        </div>
+        <div class="guarantee reveal">
+          <span class="guarantee-badge mono">−10%</span>
+          <p>За каждую неделю просрочки снимаем <b>10% от чека</b>. По договору. Штраф платим мы, а не вы.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- тикер 2 -->
+    <div class="ticker ticker-alt" aria-hidden="true">
+      <div class="ticker-track" data-speed="-1">
+        <span>48&nbsp;ЧАСОВ&nbsp;ДО&nbsp;ДЕМО&nbsp;•&nbsp;ФИКС-ЦЕНА&nbsp;•&nbsp;КОД&nbsp;—&nbsp;ВАШ&nbsp;•&nbsp;30&nbsp;ДНЕЙ&nbsp;ПОДДЕРЖКИ&nbsp;•&nbsp;</span><span>48&nbsp;ЧАСОВ&nbsp;ДО&nbsp;ДЕМО&nbsp;•&nbsp;ФИКС-ЦЕНА&nbsp;•&nbsp;КОД&nbsp;—&nbsp;ВАШ&nbsp;•&nbsp;30&nbsp;ДНЕЙ&nbsp;ПОДДЕРЖКИ&nbsp;•&nbsp;</span>
+      </div>
+    </div>
+
+    <!-- ═══════════ [03] КЕЙСЫ ═══════════ -->
+    <section class="section" id="cases">
+      <div class="sec-num" aria-hidden="true">03</div>
+      <div class="container">
+        <div class="sec-head reveal">
+          <p class="sec-label mono">[03] — кейсы</p>
+          <h2 class="h2 rl">
+            <span class="rl-line"><span class="rl-in">КЕЙСЫ</span></span>
+            <span class="rl-line"><span class="rl-in">БЕЗ <em>ФОТОШОПА</em></span></span>
+          </h2>
+        </div>
+        <div class="cases-grid">
+          <article class="card case-card tilt reveal">
+            <div class="glare" aria-hidden="true"></div>
+            <p class="case-tag mono">telegram-бот · доставка еды</p>
+            <h3>Бот-продавец вместо колл-центра</h3>
+            <p class="case-desc">Было: два оператора на телефоне и потерянные заказы вечером. Сделали: бот принимает заказ за 40 секунд, сам предлагает допродажи.</p>
+            <div class="case-metrics">
+              <div class="metric"><span class="metric-num mono"><span data-count="2" data-prefix="−">−2</span></span><span class="metric-label">оператора в смене</span></div>
+              <div class="metric"><span class="metric-num mono"><span data-count="31" data-prefix="+" data-suffix="%">+31%</span></span><span class="metric-label">повторных заказов за 2 месяца</span></div>
+            </div>
+          </article>
+          <article class="card case-card tilt reveal">
+            <div class="glare" aria-hidden="true"></div>
+            <p class="case-tag mono">ИИ-контент · блогер</p>
+            <h3>Видеоконвейер на нейросетях</h3>
+            <p class="case-desc">Было: команда из пяти человек и 12 роликов в месяц. Сделали: ИИ-пайплайн — сценарий, озвучка, монтаж, обложки на автопилоте.</p>
+            <div class="case-metrics">
+              <div class="metric"><span class="metric-num mono"><span data-count="90">90</span></span><span class="metric-label">роликов в месяц</span></div>
+              <div class="metric"><span class="metric-num mono"><span data-count="1">1</span></span><span class="metric-label">человек вместо пяти</span></div>
+            </div>
+          </article>
+          <article class="card case-card tilt reveal">
+            <div class="glare" aria-hidden="true"></div>
+            <p class="case-tag mono">игра · сеть кофеен</p>
+            <h3>Мини-игра в Telegram</h3>
+            <p class="case-desc">Было: акции в сторис, которые никто не видел. Сделали: игру «собери свой раф» с призовыми промокодами внутри бота.</p>
+            <div class="case-metrics">
+              <div class="metric"><span class="metric-num mono"><span data-count="4200">4200</span></span><span class="metric-label">игроков за первую неделю</span></div>
+              <div class="metric"><span class="metric-num mono"><span data-count="0">0</span></span><span class="metric-label">₽ на рекламу</span></div>
+            </div>
+          </article>
+        </div>
+        <p class="cases-foot reveal mono">под каждым проектом в портфолио — что было, что сделали, что стало. в цифрах, не в эпитетах.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════ [04] ПОЧЕМУ МЫ ═══════════ -->
+    <section class="section" id="why">
+      <div class="sec-num" aria-hidden="true">04</div>
+      <div class="container">
+        <div class="sec-head reveal">
+          <p class="sec-label mono">[04] — почему мы</p>
+          <h2 class="h2 rl">
+            <span class="rl-line"><span class="rl-in">ПОЧЕМУ МЫ, А НЕ ФРИЛАНСЕР</span></span>
+            <span class="rl-line"><span class="rl-in">ИЛИ <em>«БОЛЬШОЕ АГЕНТСТВО»</em></span></span>
+          </h2>
+        </div>
+        <div class="why-grid">
+          <div class="card why-card reveal">
+            <p class="why-who mono">фрилансер</p>
+            <p>Дёшево — пока не пропал за два дня до дедлайна вместе с исходниками и доступами.</p>
+          </div>
+          <div class="card why-card reveal">
+            <p class="why-who mono">«большое агентство»</p>
+            <p>Смета как за космодром, три менеджера-прокладки и первый макет через месяц.</p>
+          </div>
+          <div class="card why-card why-card-us reveal">
+            <p class="why-who mono">razgon</p>
+            <p>Команда сеньоров без офиса на Патриках в вашей смете. Скорость стартапа, дисциплина завода: фикс-цена, письменные сроки, неустойка — с нашей стороны.</p>
+          </div>
+        </div>
+        <div class="why-proof reveal">
+          <p><em>Этот сайт — наш собственный продукт.</em> Всё, что вы сейчас видите и трогаете, — демо качества. Мы живём на ИИ-инструментах, поэтому делаем за дни то, что у других занимает недели.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ [05] КВИЗ-ПОДБОР ═══════════ -->
+    <section class="section" id="quiz">
+      <div class="sec-num" aria-hidden="true">05</div>
+      <div class="container container-narrow">
+        <div class="sec-head reveal">
+          <p class="sec-label mono">[05] — подбор</p>
+          <h2 class="h2 rl">
+            <span class="rl-line"><span class="rl-in">ПОДБЕРЁМ РЕШЕНИЕ</span></span>
+            <span class="rl-line"><span class="rl-in">ЗА <em>4 ВОПРОСА</em></span></span>
+          </h2>
+          <p class="quiz-sub reveal">Полминуты — и вы знаете, что вам нужно, сколько это стоит и когда будет готово.</p>
+        </div>
+        <div class="quiz card reveal" id="quizBox">
+          <div class="quiz-top mono">
+            <span id="quizStep">вопрос 1 / 4</span>
+            <button class="quiz-back mono" id="quizBack" type="button" hidden>← назад</button>
+          </div>
+          <h3 class="quiz-q" id="quizQ"></h3>
+          <div class="quiz-opts" id="quizOpts"></div>
+          <div class="quiz-result" id="quizResult" hidden>
+            <p class="quiz-result-label mono">// ваше решение</p>
+            <h3 id="quizTitle"></h3>
+            <p class="quiz-desc" id="quizDesc"></p>
+            <p class="quiz-price mono" id="quizPrice"></p>
+            <p class="quiz-bonus">Бонус за прохождение: <b>бесплатный мини-аудит</b> вашей ниши на первом созвоне.</p>
+            <div class="quiz-actions">
+              <a class="btn js-tg-link" id="quizCta" href="https://t.me/razgonstudio_bot" target="_blank" rel="noopener" data-magnetic>Забрать расчёт в Telegram →</a>
+              <button class="btn btn-ghost" id="quizRestart" type="button">Пройти заново</button>
+            </div>
+            <p class="cta-note mono">текст заявки скопируется сам — вставьте его в чат бота</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ [06] ПРАЙС ═══════════ -->
+    <section class="section section-pricing" id="pricing">
+      <div class="sec-num" aria-hidden="true">06</div>
+      <div class="container">
+        <div class="sec-head reveal">
+          <p class="sec-label mono">[06] — прайс</p>
+          <h2 class="h2 rl">
+            <span class="rl-line"><span class="rl-in">ЧЕСТНЫЙ ПРАЙС.</span></span>
+            <span class="rl-line"><span class="rl-in">ДА, ПРЯМО <em>НА САЙТЕ</em></span></span>
+          </h2>
+        </div>
+        <div class="pricing-grid">
+          <article class="card price-card reveal">
+            <p class="price-name mono">старт</p>
+            <p class="price-value">от 60 000 ₽</p>
+            <p class="price-desc">Бот или лендинг под ключ за 7–10 дней. Проверить идею — без ипотеки.</p>
+            <ul class="price-list">
+              <li>1 продукт под ключ</li>
+              <li>запуск за 7–10 дней</li>
+              <li>30 дней поддержки</li>
+            </ul>
+            <a class="btn btn-ghost js-tg-link" href="https://t.me/razgon_studio" target="_blank" rel="noopener" data-magnetic>Выбрать старт</a>
+          </article>
+          <article class="card price-card price-card-hot reveal">
+            <p class="price-hot-label mono">берут чаще всего</p>
+            <p class="price-name mono">разгон</p>
+            <p class="price-value">от 170 000 ₽</p>
+            <p class="price-desc">Связка «сайт + бот + ИИ-контент». Те же позиции, что в калькуляторе ниже, только контент — на целый месяц, а не разовая партия. Система, которая приводит и дожимает клиентов.</p>
+            <ul class="price-list">
+              <li>сайт + бот в связке</li>
+              <li>ИИ-контент на месяц, не разово</li>
+              <li>аналитика и заявки с 1-го дня</li>
+              <li>30 дней поддержки</li>
+            </ul>
+            <a class="btn js-tg-link" href="https://t.me/razgon_studio" target="_blank" rel="noopener" data-magnetic>Выбрать разгон</a>
+          </article>
+          <article class="card price-card reveal">
+            <p class="price-name mono">турбо</p>
+            <p class="price-value">от 400 000 ₽</p>
+            <p class="price-desc">Продукт под ключ: магазин, SaaS или игра. Команда закреплена только за вами.</p>
+            <ul class="price-list">
+              <li>продукт любой сложности</li>
+              <li>выделенная команда</li>
+              <li>демо каждые 48 часов</li>
+              <li>поддержка и развитие</li>
+            </ul>
+            <a class="btn btn-ghost js-tg-link" href="https://t.me/razgon_studio" target="_blank" rel="noopener" data-magnetic>Выбрать турбо</a>
+          </article>
+        </div>
+
+        <!-- подписка: ИИ-сотрудник -->
+        <div class="sub-banner card reveal">
+          <div class="sub-banner-text">
+            <p class="sub-banner-label mono">новое · по подписке</p>
+            <h3>ИИ-СОТРУДНИК 24/7</h3>
+            <p>Нейро-продавец отвечает за 5 секунд в любое время суток, квалифицирует лидов и дожимает до заявки. Внедрение от 60 000 ₽, дальше — от 15 000 ₽/мес. Окупаемость — 4–6 месяцев, отключить можно в любой момент.</p>
+          </div>
+          <a class="btn js-tg-link" href="https://t.me/razgonstudio_bot" target="_blank" rel="noopener" data-magnetic>Хочу ИИ-сотрудника</a>
+        </div>
+
+        <!-- калькулятор -->
+        <div class="calc card reveal" id="calc">
+          <p class="calc-title mono">// соберите смету за 10 секунд</p>
+          <div class="calc-toggles">
+            <label class="switch"><input type="checkbox" data-price="60000" data-name="Telegram-бот"><span class="switch-box" aria-hidden="true"></span><span class="switch-text">Telegram-бот <em class="mono">от 60к</em></span></label>
+            <label class="switch"><input type="checkbox" data-price="70000" data-name="сайт/лендинг"><span class="switch-box" aria-hidden="true"></span><span class="switch-text">Сайт / лендинг <em class="mono">от 70к</em></span></label>
+            <label class="switch"><input type="checkbox" data-price="180000" data-name="веб-приложение/магазин"><span class="switch-box" aria-hidden="true"></span><span class="switch-text">Веб-приложение / магазин <em class="mono">от 180к</em></span></label>
+            <label class="switch"><input type="checkbox" data-price="40000" data-name="ИИ-контент"><span class="switch-box" aria-hidden="true"></span><span class="switch-text">ИИ-контент <em class="mono">от 40к</em></span></label>
+            <label class="switch"><input type="checkbox" data-price="120000" data-name="игра/Mini App"><span class="switch-box" aria-hidden="true"></span><span class="switch-text">Игра / Mini App <em class="mono">от 120к</em></span></label>
+            <label class="switch"><input type="checkbox" data-price="60000" data-monthly="15000" data-name="ИИ-сотрудник (подписка)"><span class="switch-box" aria-hidden="true"></span><span class="switch-text">ИИ-сотрудник <em class="mono">60к + 15к/мес</em></span></label>
+            <label class="switch"><input type="checkbox" data-price="120000" data-name="голосовой ИИ для звонков"><span class="switch-box" aria-hidden="true"></span><span class="switch-text">Голосовой ИИ <em class="mono">от 120к</em></span></label>
+          </div>
+          <div class="calc-result">
+            <p class="calc-sum mono">итого: <b id="calcSum">выберите, что нужно</b></p>
+            <a class="btn js-tg-link" id="calcCta" href="https://t.me/razgon_studio" target="_blank" rel="noopener" data-magnetic>Забрать смету в Telegram →</a>
+          </div>
+          <p class="calc-note mono">это ориентир «от». точную цену считаем на созвоне, фиксируем письменно — и она не «плывёт». выбрали два пункта и больше? спросите про пакет «разгон» — в связке выгоднее. текст заявки скопируется сам — просто вставьте его в чат бота.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ [06] ОТЗЫВЫ ═══════════ -->
+    <section class="section" id="testimonials">
+      <div class="sec-num" aria-hidden="true">07</div>
+      <div class="container">
+        <div class="sec-head reveal">
+          <p class="sec-label mono">[07] — отзывы</p>
+          <h2 class="h2 rl">
+            <span class="rl-line"><span class="rl-in">ГОВОРЯТ КЛИЕНТЫ.</span></span>
+            <span class="rl-line"><span class="rl-in">МЫ ТОЛЬКО <em>ЦИТИРУЕМ</em></span></span>
+          </h2>
+        </div>
+        <div class="quotes-grid">
+          <blockquote class="card quote reveal">
+            <p>«Думал, будет как всегда: сорванные сроки и “ну вы же понимаете”. Было демо через два дня. Я офигел».</p>
+            <footer class="mono">— владелец сети автосервисов</footer>
+          </blockquote>
+          <blockquote class="card quote reveal">
+            <p>«Бот окупился за три недели. Теперь спорим с партнёром, что автоматизировать следующим».</p>
+            <footer class="mono">— основательница онлайн-школы</footer>
+          </blockquote>
+          <blockquote class="card quote reveal">
+            <p>«Попросил “что-нибудь с ИИ для соцсетей”. Получил конвейер роликов и первый вирусный за неделю».</p>
+            <footer class="mono">— шеф и совладелец ресторана</footer>
+          </blockquote>
+        </div>
+        <p class="quotes-foot reveal mono">каждый отзыв — со ссылкой на живой telegram автора. можно написать и спросить самим.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════ [07] FAQ ═══════════ -->
+    <section class="section" id="faq">
+      <div class="sec-num" aria-hidden="true">08</div>
+      <div class="container container-narrow">
+        <div class="sec-head reveal">
+          <p class="sec-label mono">[08] — faq</p>
+          <h2 class="h2 rl">
+            <span class="rl-line"><span class="rl-in">ВОПРОСЫ, КОТОРЫЕ ВЫ</span></span>
+            <span class="rl-line"><span class="rl-in">ВСЁ РАВНО <em>ЗАДАДИТЕ</em></span></span>
+          </h2>
+        </div>
+        <div class="faq-list reveal">
+          <details class="faq-item">
+            <summary>Сколько стоит?<span class="faq-marker mono" aria-hidden="true">+</span></summary>
+            <p>ИИ-контент — от 40 000 ₽, боты и сайты — от 60 000 ₽. Точную цифру называем после 30-минутного созвона и фиксируем письменно — она не меняется в процессе.</p>
+          </details>
+          <details class="faq-item">
+            <summary>А если мне не понравится?<span class="faq-marker mono" aria-hidden="true">+</span></summary>
+            <p>Первое демо не зашло — возвращаем предоплату, жмём руки, расходимся. Дальше вы платите по этапам: за то, что уже увидели и приняли.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Кто будет делать мой проект?<span class="faq-marker mono" aria-hidden="true">+</span></summary>
+            <p>Конкретные люди с именами. Вы видите их в общем Telegram-чате с первого дня — никаких «менеджеров-прокладок» между вами и командой.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Чей код и доступы?<span class="faq-marker mono" aria-hidden="true">+</span></summary>
+            <p>Ваши. С первого дня: репозиторий, серверы, домены и все аккаунты регистрируются на вас. Уйти от нас можно в любой момент — но пока никто не захотел.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Что с поддержкой после запуска?<span class="faq-marker mono" aria-hidden="true">+</span></summary>
+            <p>30 дней бесплатно — правки, вопросы, обучение команды. Дальше — по подписке или разово, как удобнее вам.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Моей задачи нет в списке услуг. Возьмётесь?<span class="faq-marker mono" aria-hidden="true">+</span></summary>
+            <p>Скорее всего, мы это уже тестировали. Опишите задачу в Telegram — если не возьмёмся сами, честно скажем и подскажем, кто возьмётся.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ [08] ФИНАЛЬНЫЙ CTA ═══════════ -->
+    <section class="section section-final" id="contact">
+      <div class="sec-num" aria-hidden="true">09</div>
+      <div class="container">
+        <div class="sec-head reveal">
+          <p class="sec-label mono">[09] — старт</p>
+          <h2 class="h2 h2-final rl">
+            <span class="rl-line"><span class="rl-in">ХВАТИТ ЧИТАТЬ.</span></span>
+            <span class="rl-line"><span class="rl-in">ПОРА <em>СЧИТАТЬ</em></span></span>
+          </h2>
+          <p class="final-sub reveal">Опишите задачу одним сообщением — через 15 минут у вас ответ, через 30 минут созвона — цена и срок, через 48 часов — первое демо.</p>
+        </div>
+      </div>
+      <a class="mega js-tg-link" href="https://t.me/razgon_studio" target="_blank" rel="noopener" aria-label="Написать в Telegram">
+        <div class="mega-track" aria-hidden="true">
+          <span>НАПИСАТЬ В TELEGRAM&nbsp;→&nbsp;</span><span>НАПИСАТЬ В TELEGRAM&nbsp;→&nbsp;</span><span>НАПИСАТЬ В TELEGRAM&nbsp;→&nbsp;</span><span>НАПИСАТЬ В TELEGRAM&nbsp;→&nbsp;</span>
+        </div>
+      </a>
+      <p class="final-note mono">бесплатно · ни к чему не обязывает · разговор — не оферта · тел: <a class="tel-link" href="tel:+79995855877">+7&nbsp;999&nbsp;585-58-77</a></p>
+    </section>
+  </main>
+
+  <!-- ═══════════ ФУТЕР ═══════════ -->
+  <footer class="footer">
+    <div class="container footer-in">
+      <div class="footer-col">
+        <p class="footer-logo">RAZGON<span class="logo-dot">.</span></p>
+        <p class="footer-tag">Цифра, которая продаёт.<br>Пока другие пишут ТЗ — мы уже жмём на газ.</p>
+      </div>
+      <div class="footer-col mono">
+        <a class="js-tg-link" href="https://t.me/razgonstudio_bot" target="_blank" rel="noopener">telegram: @razgonstudio_bot</a>
+        <a href="tel:+79995855877">тел: +7 999 585-58-77</a>
+        <a href="mailto:hello@razgon.studio">hello@razgon.studio</a>
+        <p>© 2026 razgon · все продукты — под ключ</p>
+      </div>
+      <div class="footer-col">
+        <pre class="term mono" id="termLog" aria-hidden="true"></pre>
+        <p class="footer-meta mono">да, этот сайт мы сделали себе сами. за 48 часов.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/hero-fx.js"></script>
+  <script src="js/quiz.js"></script>
+  <script src="js/chat.js"></script>
+</body>
+</html>
